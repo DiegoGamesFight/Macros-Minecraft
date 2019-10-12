@@ -17,7 +17,6 @@ if(mcacto);
 else;
     set(mcacto);
 	set(menu_cacto);
-	unset(inventory_organize);
     clearchat();
     log(&9&l[&f&oM&racro&9&l] &aTorre de Cacto &f&l[&2ON&f&l]);
     wait(3);
@@ -560,7 +559,6 @@ do;
 	/////////////////Começo dos andares
 		do;
 			if(%#floor_now%>%#andares%);
-				dec(#floor_now);
 				set(&towers_done[%#tower_now%],"true - %#andares%");
 				set(#backup_tower,"%#tower_now%");
 				set(toggle_tower);
@@ -568,13 +566,8 @@ do;
 			endif;
 			
 			-- Menu de Pausa
-			if(((KEY_RETURN)&&(KEY_BACK))||(menu_pause));
-				unset(menu_pause);
-				log("");
-				log("&9&l[&f&oM&facro&9&l] &aEntrando no modo Pausa.");
-				log("");
+			if((KEY_RETURN)&&(KEY_BACK));
 				do;while((KEY_RETURN)||(KEY_BACK));
-				wait(200ms);
 				set(#backup_tower,"%#tower_now%");
 				do;
 					prompt(&choice,"$$[ [---Menu Pausa---,>>> Mudar de Torre.,,>>> Continuar]]","Escolha uma opção:");
@@ -794,7 +787,6 @@ do;
 						
 					-- Repor recursos
 					if(inventory_organize);
-						unset(inventory_organize);
 						#chest_cactu = 1;
 						#chest_dirt = 1;
 						#chest_sand = 1;
@@ -1517,26 +1509,19 @@ do;
 			
 			gui();
 			wait(500ms);
-			
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
-			
+	 
 			#ypos= %YPOS% + 1;
 			do;pick(3);look(90,90);keydown(JUMP);wait(200ms);key(use);keyup(JUMP);wait(400ms);until(%YPOS%=%#ypos%);
 			keydown(sneak);
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			look(90,80);pick(3);keydown(back);wait(800ms);keyup(back);key(use);wait(400ms);
 			look(270,80);pick(3);keydown(back);wait(1600ms);keyup(back);key(use);wait(400ms);
 			look(90,80);keydown(back);wait(680ms);keyup(back);wait(400ms);
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			look(0,80);pick(3);keydown(back);wait(800ms);keyup(back);key(use);wait(400ms);
 			look(180,80);pick(3);keydown(back);wait(1600ms);keyup(back);key(use);wait(400ms);
 			look(0,80);keydown(back);wait(680ms);keyup(back);wait(400ms);
 			keyup(sneak);
-			
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			if(#modo == 2);
 				do;
-					if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 					#repetir=0;
 					getidrel(-1,-1,0,#id);
 					if(%#id% != 3);#repetir=1;keydown(sneak);pick(3);
@@ -1560,28 +1545,22 @@ do;
 					keydown(sneak);endif;
 				until(%#repetir%=0);
 			endif;
-			
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			do(4);pick(12);look(+90,60);wait(100ms);key(use);wait(350ms);loop;
 			#ypos= %YPOS% + 3;
 			do;pick(3);look(90,90);keydown(jump);wait(200ms);key(use);keyup(jump);wait(400ms);until(%YPOS%=%#ypos%);
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			keydown(sneak);look(90,84);keydown(back);wait(1);keyup(back);wait(200ms);keyup(sneak);
 			do;slot(9);key(attack);look(90,84);until(%HITID% == 0);wait(200ms);
 			keydown(sneak);
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			look(+0,90);pick(81);wait(50ms);key(use);wait(300ms);
 			look(150,69);pick(81);wait(50ms);key(use);wait(300ms);
 			look(23,69);pick(81);wait(50ms);key(use);wait(300ms);look(270,90);
 			keydown(sneak);keydown(back);wait(1300ms);keyup(back);wait(400ms);keyup(sneak);
 			look(+0,90);pick(81);wait(50ms);key(use);wait(300ms);
-			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			keyup(sneak);
 			look(90,90);
 			keydown(sneak);keydown(back);wait(600ms);keyup(back);wait(400ms);keyup(sneak);
 			if(#modo == 2);
 				do;
-					if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 					#repetir=0;
 					getidrel(1,-3,0,#id);
 					if(%#id% != 12);#repetir=1;keydown(sneak);pick(12);
@@ -1628,26 +1607,22 @@ do;
 			endif;
 			
 			inc(#floor_now);
-			inc(#total_andares_concluidos,1);
 			set(&towers_done[%#tower_now%],"false - %#floor_now%");
-			#andares_concluidos = %#floor_now% - 1;
-			#torres_feitas = 0;
-			for(#p,1,%#homes%);
-				ifmatches(%&towers_done[%#p%]%,"^(true|false) - \d+$");
-					match(%&towers_done[%#p%]%,"^(true|false) - \d+$",{&check});
-					ifmatches(%&check%,"^true$");
-						inc(#torres_feitas);
-					endif;
-				endif;
-			next;
-			
+			inc(#andares_concluidos,1);
+			inc(#total_andares_concluidos,1);
+			if(#andares_concluidos = #andares);
+				inc(#torres_feitas,1);
+			endif;
 			log("");
 			log("&9&l[&f&oM&facro&9&l] &aTorre Cacto:");
 			log("");
-			log("&9&l[&f&oM&facro&9&l] &fTorres concluídas: &a%#torres_feitas%/%#homes%");
+			log("&9&l[&f&oM&facro&9&l] &fTorre concluída: &a%#torres_feitas%/%#homes%");
 			log("&9&l[&f&oM&facro&9&l] &fAndar concluído: &a%#andares_concluidos%/%#andares%"); 
 			log("&9&l[&f&oM&facro&9&l] &fAndares feitos (total): &a%#total_andares_concluidos%");   
 			wait(500ms);
+			if(#andares_concluidos = #andares);
+				set(#andares_concluidos,"");
+			endif;
 		loop;
 		
 		do(2);
@@ -1671,9 +1646,6 @@ log("&9&l[&f&oM&racro&9&l] &cTorre de Cacto &f&l[&4OFF&f&l]");
 unset(&towers_done[]);
 unset(doing_already);
 unset(mcacto);
-set(#tower_now,"1");
-set(#floor_now,"1");
 stop;
 endif;
 }$$
-
