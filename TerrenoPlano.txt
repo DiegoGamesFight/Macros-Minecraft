@@ -1,0 +1,265 @@
+$${
+if( tplano);
+    unset(tplano);
+    clearchat();
+    log("Macro de Terreno Plano [OFF]");
+    keyup(back);
+    keyup(sneak);
+    stop;
+else;
+    set(tplano);
+    clearchat();
+    log("Macro de Terreno Plano [ON]");
+endif;
+
+prompt(#comprimento,$$?,"Qual o comprimento do plano?");                    	//Pergunta o comprimento
+prompt(#largura,$$?,"Qual a largura do plano?");                                    	//Pergunta a largura
+prompt(&item_id,$$i:d,"Qual item deseja escolher pra construir?");    //Escolha do bloco
+prompt(#option,$$?,"Qual direção?");                                    							//Direçãoo: direita-superior/inferior...
+if(%#option% = 1);&direction_flat = "right_top";                       						//Define a direção de acordo com a opção
+elseif(%#option% = 2);&direction_flat = "right_bottom";
+elseif(%#option% = 3);&direction_flat = "left_bottom";
+elseif(%#option% = 4);&direction_flat = "left_top";
+endif;
+
+wait(1);
+
+ifmatches(%&item_id%,"^(\d+):?(\d+)?$");
+	match(%&item_id%,"^(\d+):?(\d+)?$",{&item_check,});
+endif;
+
+////////Variáveis/////////
+#length = %#comprimento%;//
+#width = %#largura%;          //
+//////////////////////////      
+//Variáveis inalteráveis//
+#line = 1;                              //
+#item_id ;                             //
+#main_x = %XPOS%;                //
+#main_z = %ZPOS%;                //
+#stop = 0;                              //
+//////////////////////////
+
+///////////////////////////////////////Definir variáveis de distância e direção
+ifmatches(%&direction_flat%,"right_top");
+    #new_z = %#main_z% - (%#length% - 1);
+    &look_at = "NORTH";
+    #look_ato = 180;
+    #look_90 = 270;
+    #look_180 = 360;
+endif;
+ifmatches(%&direction_flat%,"right_bottom");
+    #new_x = %#main_x% + (%#length% - 1);
+    &look_at = "EAST";
+    #look_ato = 270;
+    #look_90 = 360;
+    #look_180 = 90;
+endif;
+ifmatches(%&direction_flat%,"left_bottom");
+    #new_z = %#main_z% + (%#length% - 1);
+    &look_at =  "SOUTH";
+    #look_ato = 0;
+    #look_90 = 90;
+    #look_180 = 180;
+    log(%#new_z%);
+endif;
+ifmatches(%&direction_flat%,"left_top");
+    #new_x = %#main_x% - (%#length% - 1);
+    &look_at =  "WEST";
+    #look_ato = 90;
+    #look_90 = 180;
+    #look_180 = 270;
+endif;
+
+///////////////////////////////////////Percorrer o comprimento////
+look(%&look_at%);
+set(come);
+wait(1);
+
+do;
+
+    /////////////////////////////////////Primeira fileira
+    if(come); 
+        unset(come);
+        #bollean = 0;
+        do;
+            if(%#option% = 1);
+                if(%ZPOS% <=%#new_z%);
+                    #bollean = 1;
+                endif;
+            elseif(%#option% = 2);
+                if(%XPOS%>=%#new_x%);
+                    #bollean = 1;
+                endif;
+            elseif(%#option% = 3);
+                if(%ZPOS%>=%#new_z%);
+                    #bollean = 1;
+                endif;
+            elseif(%#option% = 4);
+                if(%XPOS%<=%#new_x%);
+                    #bollean = 1;
+                endif;
+            endif;
+            
+            pick(%&item_id%);
+            look(%#look_ato%,82);
+            key(use);
+            keydown(sneak);
+            keydown(back);
+            wait(30ms);
+        until(#bollean = 1);
+                
+        wait(300ms);
+        keyup(back);
+        
+        do;
+            wait(500ms);
+            pick(%&item_id%);
+            look(%#look_ato%,82);
+            key(use);
+            wait(50ms);
+            getidrel(0,-1,0,&check);
+                ifmatches(%&check%,%&item_check%);
+                    keyup(sneak);
+                    break;
+                endif;
+        loop;
+        
+        if(%#line%=%#width%); //Indo pro outro lado ou parando a macro
+            #stop = 1;
+        else;
+            inc(#line);
+            
+            wait(100ms);
+            keydown(sneak);
+            look(%#look_90%,82);
+            wait(300ms);
+                #xpos = %XPOS%;
+                #zpos = %ZPOS%;
+                    do;
+                        keydown(back);
+                    until((%ZPOS%=%#zpos%+1)|(%ZPOS%=%#zpos%-1)|(%XPOS%=%#xpos%+1)|(%XPOS%=%#xpos%-1));
+                wait(100ms);
+                keyup(back);
+                    
+                do;
+                    wait(300ms);
+                    pick(%&item_id%);
+                    look(%#look_90%,82);
+                    key(use);
+                    wait(50ms);
+                    getidrel(0,-1,0,&check);
+                        ifmatches(%&check%,%&item_check%);
+                            keydown(back);
+                            wait(100ms);
+                            keyup(back);
+                            wait(30ms);
+                            keyup(sneak);
+                            break;
+                        endif;
+                loop;
+                    
+            look(%#look_180%,82);
+            set(comeback);
+        endif;
+    endif;
+    
+//////////////////
+    if(#stop = 1);  //
+        break;          	// Parar a macro.
+    endif;              	//
+//////////////////
+    
+    ///////////////////////////////////////Segunda fileira
+    if(comeback);
+        unset(comeback);
+        #bollean = 0;
+            do;
+                if(%#option% = 1);
+                    if(%ZPOS% >=%#main_z%);
+                        #bollean = 1;
+                    endif;
+                elseif(%#option% = 2);
+                    if(%XPOS%<=%#main_x%);
+                        #bollean = 1;
+                    endif;
+                elseif(%#option% = 3);
+                    if(%ZPOS%<=%#main_z%);
+                        #bollean = 1;
+                    endif;
+                elseif(%#option% = 4);
+                    if(%XPOS%>=%#main_x%);
+                        #bollean = 1;
+                    endif;
+                endif;
+                
+                pick(%&item_id%);
+                look(%#look_180%,82);
+                key(use);
+                keydown(sneak);
+                keydown(back);
+                wait(30ms);
+            until(#bollean = 1);
+                
+        wait(300ms);
+        keyup(back);
+        
+        do;
+            wait(500ms);
+            pick(%&item_id%);
+            look(%#look_180%,82);
+            key(use);
+            wait(50ms);
+            getidrel(0,-1,0,&check);
+                ifmatches(%&check%,%&item_check%);
+                    keyup(sneak);
+                    break;
+                endif;
+        loop;
+        
+        if(%#line%=%#width%); //Ir para outro lado ou desligar a macro.
+            #stop = 1;
+        else;
+            inc(#line);
+            
+            wait(100ms);
+            keydown(sneak);
+            look(%#look_90%,82);
+            wait(300ms);
+                #xpos = %XPOS%;
+                #zpos = %ZPOS%;
+                    do;
+                        keydown(back);
+                    until((%ZPOS%=%#zpos%+1)|(%ZPOS%=%#zpos%-1)|(%XPOS%=%#xpos%+1)|(%XPOS%=%#xpos%-1));
+                wait(100ms);
+                keyup(back);
+                    
+                do;
+                    wait(300ms);
+                    pick(%&item_id%);
+                    look(%#look_90%,82);
+                    key(use);
+                    wait(50ms);
+                    getidrel(0,-1,0,&check);
+                        ifmatches(%&check%,%&item_check%);
+                            keydown(back);
+                            wait(100ms);
+                            keyup(back);
+                            wait(30ms);
+                            keyup(sneak);
+                            break;
+                        endif;
+                loop;
+                    
+            set(come);
+        endif;
+    endif;
+    
+//////////////////
+    if(#stop = 1);  //
+        break;          	// Parar a macro.
+    endif;              	//
+//////////////////
+loop;   
+
+}$$
