@@ -1,5 +1,12 @@
 $${
 
+// Commit:
+// - Auto-saveLife adicionado;
+// - Desligar a macro no modo Pausa e salvar torre;
+// - Corrigido bug que não mostrava 'torres feitas' corretamente;
+// - Corrigido bug em que se tivesse recursos no hotbar e tivesse item incorreto,
+// ele não recolocaria no inventário.
+
 /////////////////Desligar
 if(mcacto);
     unset(mcacto);
@@ -13,29 +20,39 @@ if(mcacto);
         endif;
     keyup(back);keyup(forward);
     keyup(sneak);keyup(jump);
+	unset(@cacto_tower_save);
+	stop(cactosave);
     stop;
 else;
     set(mcacto);
 	set(menu_cacto);
 	unset(inventory_organize);
     clearchat();
-    log(&9&l[&f&oM&racro&9&l] &aTorre de Cacto &f&l[&2ON&f&l]);
-    wait(3);
+    log("&9&l[&f&oM&racro&9&l] &aTorre de Cacto &f&l[&2ON&f&l]");
+	log("");
+	if(@cacto_tower_save_msg);
+		unset(@cacto_tower_save_msg);
+		log("&4** FOI DETECTADO AUTO-DISCONNECT POR ESTAR COM POUCA VIDA.");
+	endif;
+	wait(3);
     
 /////////////////Ligar
 
--- ConfiguraÃ§Ã£o de Macro:
--- * Poder comer e comprar comida na macro;
--- * Continuar  de onde parou ou recomeÃ§ar novamente;
--- * Selecionar a torre e o andar que deseja fazer; (feito);
--- * Possibilidade de escolher onde comeÃ§ar; (semi-feito)
--- * Poder pular de torre durante a macro; (semi-feito)
--- * Auto-reconnect;
--- * Pausar a macro (menu). (BACK + RETURN)
+-- Configuração de Macro:
+-- * Poder comer e comprar comida na macro; (não-feito)
+-- * Continuar  de onde parou ou recomeçar novamente; (feito)
+-- * Selecionar a torre e o andar que deseja fazer; (feito)
+-- * Possibilidade de escolher onde começar; (feito)
+-- * Poder pular de torre durante a macro; (feito)
+-- * Auto-reconnect; (impossível)
+-- * Desconectar quando estiver com pouca vida; (feito)
+-- * Pausar a macro (menu). (BACK + RETURN) (feito)
+-- * Parar a macro no menu pausa e salvar sethome. (não-feito)
 
--- * Home baÃº com 90 no total (feito)
--- * Corrigir erros durante a construÃ§Ã£o de uma torre (feito)
--- * OrganizaÃ§Ã£o de inventÃ¡rio (feito)
+
+-- * Home baú com 90 no total (feito)
+-- * Corrigir erros durante a construção de uma torre (feito)
+-- * Organização de inventário (feito)
 -- * Realocar itens se estiver algo fora do lugar (feito)
  
 /////////////////Perguntas
@@ -43,11 +60,11 @@ else;
 		set(&choice,"");
 		do;
 				if(doing_already);
-					prompt(&choice,"$$[ [Sim,Continuar Onde Parou,NÃ£o]]","Iniciar Ãºltimas configuraÃ§Ãµes?");
+					prompt(&choice,"$$[ [Continuar Onde Parou,Sim,Não]]","Iniciar últimas configurações?");
 				else;
-					prompt(&choice,"$$[ [Sim,NÃ£o]]","Iniciar Ãºltimas configuraÃ§Ãµes?");
+					prompt(&choice,"$$[ [Sim,Não]]","Iniciar últimas configurações?");
 				endif;
-				ifmatches(%&choice%,"^Sim$|^NÃ£o$|^Continuar Onde Parou$|^$");
+				ifmatches(%&choice%,"^Sim$|^Não$|^Continuar Onde Parou$|^$");
 					ifmatches(%&choice%,"^Sim$");
 						unset(register);
 						unset(&towers_done[]);
@@ -55,7 +72,7 @@ else;
 						do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 						break;
 					endif;
-					ifmatches(%&choice%,"^NÃ£o$");
+					ifmatches(%&choice%,"^Não$");
 						set(register);
 						unset(&towers_done[]);
 						unset(doing_already);
@@ -72,7 +89,7 @@ else;
 						endif;
 					endif;
 				else;
-					log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
+					log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
 					unset(mcacto);
 					stop;
 				endif;
@@ -102,7 +119,7 @@ else;
 						break;
 					endif;
 				else;
-					log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
+					log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
 					unset(mcacto);
 					stop;
 				endif;
@@ -118,7 +135,7 @@ else;
 					if(%#andares%>0);
 						break;
 					else;
-						log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
+						log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
 						unset(mcacto);
 						stop;
 					endif;
@@ -134,7 +151,7 @@ else;
 					if(%#homes%>0);
 						break;
 					else;
-						log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
+						log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
 						unset(mcacto);
 						stop;
 					endif;
@@ -169,15 +186,15 @@ else;
 							prompt(#tempo,$$?,"Escolha seu delay:");
 								if(%#tempo%<1);
 									set(#tempo,"7");                                    
-									log("&9&l[&f&oM&facro&9&l] &cNÃºmero invÃ¡lido, alterado automaticamente para &27&c.");
+									log("&9&l[&f&oM&facro&9&l] &cNúmero inválido, alterado automaticamente para &27&c.");
 								else;
-									log("&9&l[&f&oM&facro&9&l] &aDuraÃ§Ã£o de teleporte mudado para: &2&l%#tempo%");
+									log("&9&l[&f&oM&facro&9&l] &aDuração de teleporte mudado para: &2&l%#tempo%");
 								endif;
 								wait(1500ms);
 							break;
 						endif;
 					else;
-						log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
+						log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
 						unset(mcacto);
 						stop;
 					endif;
@@ -186,28 +203,28 @@ else;
 			set(backup);
 	endif;
 
-	-- Menu De ConfiguraÃ§Ã£o
+	-- Menu De Configuração
 	if(menu_cacto);
 		do;
 			set(&choice,"");
 			clearchat();
-			prompt(&choice,"$$[ [---ConfiguraÃ§Ã£o---,,>>> Mudar CorreÃ§Ã£o de Erro.,>>> Mudar Andares.,>>> Mudar Torres.,>>> Mudar Delay.,>>> Escolher Onde comeÃ§ar.,,>>> Verificar ConfiguraÃ§Ã£o.,,- Continuar -,DESLIGAR MACRO]]","Escolha uma opÃ§Ã£o:");
-					ifmatches(%&choice%,"^>>> Mudar CorreÃ§Ã£o de Erro.$");
+			prompt(&choice,"$$[ [---Configuração---,,>>> Mudar Correção de Erro.,>>> Mudar Andares.,>>> Mudar Torres.,>>> Mudar Delay.,>>> Escolher Onde começar.,,>>> Verificar Configuração.,,- Continuar -,DESLIGAR MACRO]]","Escolha uma opção:");
+					ifmatches(%&choice%,"^>>> Mudar Correção de Erro.$");
 						do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 							do;
 								set(&choice,"");
 									if(%#modo% = 2);
 										set(&display_correction,"'Corrigindo'");
 									else;
-										set(&display_correction,"'NÃ£o Corrigindo'");
+										set(&display_correction,"'Não Corrigindo'");
 									endif;
-								prompt(&choice,"$$[ [---Mudar para---,>>> Corrigir Erros,>>> NÃ£o Corrigir,>>> Voltar,,(ConfiguraÃ§Ã£o Atual),* %&display_correction%]]","Escolha uma opÃ§Ã£o:");
+								prompt(&choice,"$$[ [---Mudar para---,>>> Corrigir Erros,>>> Não Corrigir,>>> Voltar,,(Configuração Atual),* %&display_correction%]]","Escolha uma opção:");
 									ifmatches(%&choice%,"^>>> Corrigir Erros$");
 										set(#modo,"2");
 										do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 										break;
 									endif;
-									ifmatches(%&choice%,"^>>> NÃ£o Corrigir$");
+									ifmatches(%&choice%,"^>>> Não Corrigir$");
 										set(#modo,"1");
 										do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 										break;
@@ -224,7 +241,7 @@ else;
 								set(&choice,"");
 								set(&comeback_menu,"");
 								clearchat();
-								prompt(&choice,"$$[ [---Andares---,>>> Trocar,>>> Voltar,,(ConfiguraÃ§Ã£o Atual),%#andares% Andares]]","Escolha uma opÃ§Ã£o:");
+								prompt(&choice,"$$[ [---Andares---,>>> Trocar,>>> Voltar,,(Configuração Atual),%#andares% Andares]]","Escolha uma opção:");
 									ifmatches(%&choice%,"^>>> Trocar$");
 										do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 										set(#backup_floor,"%#andares%");
@@ -244,8 +261,8 @@ else;
 														set(#andares,"%#backup_floor%");
 														clearchat();
 														log("");
-														log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
-														log("&9&l[&f&oM&facro&9&l] &cVoltando a configuraÃ§Ã£o original.");
+														log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
+														log("&9&l[&f&oM&facro&9&l] &cVoltando a configuração original.");
 														wait(1500ms);
 														break;
 													endif;
@@ -265,7 +282,7 @@ else;
 								set(&choice,"");
 								set(&comeback_menu,"");
 								clearchat();
-								prompt(&choice,"$$[ [---Torres---,>>> Trocar,>>> Voltar,,(ConfiguraÃ§Ã£o Atual),%#homes% Torres]]","Escolha uma opÃ§Ã£o:");
+								prompt(&choice,"$$[ [---Torres---,>>> Trocar,>>> Voltar,,(Configuração Atual),%#homes% Torres]]","Escolha uma opção:");
 									ifmatches(%&choice%,"^>>> Trocar$");
 										do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 										set(#backup_tower,"%#homes%");
@@ -285,8 +302,8 @@ else;
 														set(#homes,"%#backup_tower%");
 														clearchat();
 														log("");
-														log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
-														log("&9&l[&f&oM&facro&9&l] &cVoltando a configuraÃ§Ã£o original.");
+														log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
+														log("&9&l[&f&oM&facro&9&l] &cVoltando a configuração original.");
 														wait(1500ms);
 														break;
 													endif;
@@ -306,7 +323,7 @@ else;
 								set(&choice,"");
 								set(&comeback_menu,"");
 								clearchat();
-								prompt(&choice,"$$[ [---Delay---,>>> Trocar,>>> Voltar,,(ConfiguraÃ§Ã£o Atual),%#tempo% Segundos]]","Escolha uma opÃ§Ã£o:");
+								prompt(&choice,"$$[ [---Delay---,>>> Trocar,>>> Voltar,,(Configuração Atual),%#tempo% Segundos]]","Escolha uma opção:");
 									ifmatches(%&choice%,"^>>> Trocar$");
 										do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 										set(#backup_time,"%#tempo%");
@@ -324,8 +341,8 @@ else;
 														set(#tempo,"%#backup_time%");
 														clearchat();
 														log("");
-														log("&9&l[&f&oM&facro&9&l] &cResposta InvÃ¡lida!");
-														log("&9&l[&f&oM&facro&9&l] &cVoltando a configuraÃ§Ã£o original.");
+														log("&9&l[&f&oM&facro&9&l] &cResposta Inválida!");
+														log("&9&l[&f&oM&facro&9&l] &cVoltando a configuração original.");
 														wait(1500ms);
 														break;
 													endif;
@@ -339,13 +356,13 @@ else;
 									endif;
 							loop;
 					endif;
-					ifmatches(%&choice%,"^>>> Escolher Onde comeÃ§ar.$");
+					ifmatches(%&choice%,"^>>> Escolher Onde começar.$");
 						do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 							do;
 								set(&choice,"");
 								set(&comeback_menu,"");
 								clearchat();
-								prompt(&choice,"$$[ [---ComeÃ§ar Em---,>>> Escolher,>>> Voltar,,(ConfiguraÃ§Ã£o Atual),Torre: %#tower_now%,Andar: %#floor_now%]]","Escolha uma opÃ§Ã£o:");
+								prompt(&choice,"$$[ [---Começar Em---,>>> Escolher,>>> Voltar,,(Configuração Atual),Torre: %#tower_now%,Andar: %#floor_now%]]","Escolha uma opção:");
 									ifmatches(%&choice%,"^>>> Escolher$");
 										do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 											do;
@@ -410,7 +427,7 @@ else;
 												endif;
 												
 												clearchat();
-												log("&9&l[&f&oM&facro&9&l] &6ConfiguraÃ§Ã£o:");
+												log("&9&l[&f&oM&facro&9&l] &6Configuração:");
 												log("");
 												log("&9&l[&f&oM&facro&9&l]  %&change_floor%  %&min_floor% &f%#floor_now%/%#andares% %&max_floor%");
 												log("&9&l[&f&oM&facro&9&l]  %&change_tower%  %&min_tower% &f%#tower_now%/%#homes% %&max_tower%");
@@ -431,15 +448,15 @@ else;
 									endif;
 							loop;
 					endif;
-					ifmatches(%&choice%,"^>>> Verificar ConfiguraÃ§Ã£o.$");
+					ifmatches(%&choice%,"^>>> Verificar Configuração.$");
 						do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 						clearchat();
 						log(" ");
-						log("&9&l[&f&oM&facro&9&l] &6ConfiguraÃ§Ã£o:");
+						log("&9&l[&f&oM&facro&9&l] &6Configuração:");
 						if(%#modo%=2);
 							log("&9&l[&f&oM&facro&9&l] &fCorrigir Erros: &aSim");
 						else;
-							log("&9&l[&f&oM&facro&9&l] &fCorrigir Erros: &cNÃ£o");
+							log("&9&l[&f&oM&facro&9&l] &fCorrigir Erros: &cNão");
 						endif;
 						if(%#tempo%=0);
 							log("&9&l[&f&oM&facro&9&l] &fTempo de teleporte: &c&oSem delay");
@@ -451,7 +468,7 @@ else;
 						log("&9&l[&f&oM&facro&9&l] &fTorres: &a%#homes%");    
 						log("&9&l[&f&oM&facro&9&l] &fAndares (Cada torre): &a%#andares%");
 						log(" ");
-						log("&9&l[&f&oM&facro&9&l] &6ComeÃ§ar em: ");
+						log("&9&l[&f&oM&facro&9&l] &6Começar em: ");
 						log(" &7&l- &fTorre: &a%#tower_now%/%#homes%");    
 						log(" &7&l- &fAndar: &a%#floor_now%/%#andares%");
 						log(" ");
@@ -487,7 +504,50 @@ else;
 		next;
 		set(doing_already);
 	endif;
-
+	
+	if(%HEALTH% < 5);
+		clearchat();
+		log("&9&l[&f&oM&facro&9&l] &cVocê está com pouca vida,");
+		log("&9&l[&f&oM&facro&9&l] &cComa primeiro antes de iniciar.");
+		log("");
+		log("&9&l[&f&oM&racro&9&l] &cTorre de Cacto &f&l[&4OFF&f&l]");
+		keyup(back);keyup(forward);
+		keyup(sneak);keyup(jump);
+		unset(mcacto);
+		unset(doing_already);
+		stop;
+	else;
+		stop(cactosave);
+		unset(@cacto_tower_save);
+		do(2);
+			clearchat();
+			log("");
+			log("&9&l[&f&oM&racro&9&l] &aAtivando Auto-saveLife...");
+			exec("TorreCacto_save.txt", "cactosave", "true");
+			wait(3);
+			if(@cacto_tower_save);
+				break;
+			endif;
+		loop;
+		
+		if(!@cacto_tower_save);
+			clearchat();
+			log("&9&l[&f&oM&facro&9&l] &cParece que você não tem o aquivo");
+			log("&9&l[&f&oM&facro&9&l] &c'TorreCato_save' instalado");
+			log("&9&l[&f&oM&facro&9&l] &cOu instalou de maneira errada. Verifique o tutorial.");
+			log("&9&l[&f&oM&facro&9&l] &cDesligando...");
+			log("");
+			log("&9&l[&f&oM&racro&9&l] &cTorre de Cacto &f&l[&4OFF&f&l]");
+			keyup(back);keyup(forward);
+			keyup(sneak);keyup(jump);
+			unset(mcacto);
+			unset(doing_already);
+			stop;
+		endif;
+	endif;
+	
+	wait(1);
+		
 /////////////////Fim
  
 /////////////////Variaveis
@@ -539,7 +599,7 @@ do;
 		
 		gui(inventory);
 		wait(1);
-		log("&9&l[&f&oM&facro&9&l] &aVerificando item(s) incorreto(s) no inventÃ¡rio.");
+		log("&9&l[&f&oM&facro&9&l] &aVerificando item(s) incorreto(s) no inventário.");
 		
 		#inventory_organize = 0;
 		for(#slot,9,17);getslotitem(%#slot%,#id);if((%#id% = 0)|(%#id% = 81));else;inc(#inventory_organize);endif;next;
@@ -557,7 +617,7 @@ do;
 			set(pegar_terra);
 		endif;
 		
-	/////////////////ComeÃ§o dos andares
+	/////////////////Começo dos andares
 		do;
 			if(%#floor_now%>%#andares%);
 				dec(#floor_now);
@@ -573,17 +633,18 @@ do;
 				log("");
 				log("&9&l[&f&oM&facro&9&l] &aEntrando no modo Pausa.");
 				log("");
+				gui();
 				do;while((KEY_RETURN)||(KEY_BACK));
 				wait(200ms);
 				set(#backup_tower,"%#tower_now%");
 				do;
-					prompt(&choice,"$$[ [---Menu Pausa---,>>> Mudar de Torre.,,>>> Continuar]]","Escolha uma opÃ§Ã£o:");
+					prompt(&choice,"$$[ [---Menu Pausa---,>>> Mudar de Torre.,,>>> Continuar,- DESLIGAR MACRO]]","Escolha uma opção:");
 						ifmatches(%&choice%,"^>>> Mudar de Torre.$");
 								do;
 									set(&choice,"");
 									set(&comeback_menu,"");
 									clearchat();
-									prompt(&choice,"$$[ [---Mudar de Torre---,>>> Escolher,>>> Voltar,,(ConfiguraÃ§Ã£o Atual),Torre: %#tower_now%,Andar: %#floor_now%]]","Escolha uma opÃ§Ã£o:");
+									prompt(&choice,"$$[ [---Mudar de Torre---,>>> Escolher,>>> Voltar,,(Configuração Atual),Torre: %#tower_now%,Andar: %#floor_now%]]","Escolha uma opção:");
 										ifmatches(%&choice%,"^>>> Escolher$");
 											do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 											unset(log_toggle);
@@ -669,7 +730,7 @@ do;
 													endif;
 													
 													clearchat();
-													log("&9&l[&f&oM&facro&9&l] &6ConfiguraÃ§Ã£o:");
+													log("&9&l[&f&oM&facro&9&l] &6Configuração:");
 													log("");
 													log("&9&l[&f&oM&facro&9&l]  %&change_floor%  %&min_floor% &f%#floor_now%/%#andares% %&max_floor%");
 													log("&9&l[&f&oM&facro&9&l]  %&change_tower%  %&min_tower% &f%#tower_now%/%#homes% %&max_tower%");
@@ -677,8 +738,8 @@ do;
 													log(" &c* Aperte &6&lBACK &cpara selecionar entre &6&lAndar/Torre");
 													log(" &c* Pressione &6&l+ &ce &6&l- &cpara &6&lAUMENTAR/DIMINUIR &cos valores");
 													log("");
-													log("%&done% ESTÃ TORRE JÃ FOI FINALIZADA, CASO SELECIONE ELA, SEU");
-													log("%&done% ESTADO DE FEITO MUDARÃ.");
+													log("%&done% ESTA TORRE JA FOI FINALIZADA, CASO SELECIONE ELA, SEU");
+													log("%&done% ESTADO DE FEITO MUDARA.");
 													log("");
 													log(" &cPressione RETURN quando estiver tudo OK!");
 													wait(10ms);
@@ -696,6 +757,31 @@ do;
 					ifmatches(%&choice%,"^>>> Continuar$");
 						do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
 						break;
+					endif;
+					ifmatches(%&choice%,"^- DESLIGAR MACRO$");
+						do;while((KEY_RETURN)||(KEY_NUMPADRETURN));
+						log("&9&l[&f&oM&facro&9&l] &aSalvando torre...");
+						do(2);
+							echo(/sethome torre%#backup_tower%);
+							wait(3);
+						loop;
+						clearchat();
+						log("");
+						log("&9&l[&f&oM&racro&9&l] &cTorre de Cacto &f&l[&4OFF&f&l]");
+							if(%#fa_torre%=1);
+								#fa_torre = 0;
+								log(" ");
+								log("&9&l[&f&oM&facro&9&l] &fAndares concluidos: &a%#total_andares_concluidos%");
+								log("&9&l[&f&oM&facro&9&l] &fTorres feitas: &a%#torres_feitas%&f/&a%#homes%");
+							endif;
+						keyup(back);keyup(forward);
+						keyup(sneak);keyup(jump);
+						set(#backup_tower,"%#tower_now%");
+						unset(mcacto);
+						unset(stop_tower);
+						unset(@cacto_tower_save);
+						stop(cactosave);
+						stop;
 					endif;
 				loop;
 			endif;
@@ -751,7 +837,7 @@ do;
 			log(passou);
 			log(%#cacto% - %#terra% - %#areia%);
 			
-	///////////////////Procurar recursos no inventario, se nÃ£o tiver, buscar no baÃº       
+	///////////////////Procurar recursos no inventario, se não tiver, buscar no baú       
 			if(procurar);
 				unset(procurar);
 				#terra_inv=0;
@@ -795,6 +881,7 @@ do;
 					-- Repor recursos
 					if(inventory_organize);
 						unset(inventory_organize);
+						#terra=0;#areia=0;#cacto=0;
 						#chest_cactu = 1;
 						#chest_dirt = 1;
 						#chest_sand = 1;
@@ -832,7 +919,7 @@ do;
 							if(%#chest_cactu% = 28);look(398,20);wait(%#time%ms);endif;
 							if(%#chest_cactu% = 29);look(398,34);wait(%#time%ms);endif;
 							if(%#chest_cactu% = 30);look(398,44);wait(%#time%ms);endif;
-							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_cactu%");
+							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_cactu%");
 							
 								#gui=0;#stop = 0;
 								do;
@@ -896,7 +983,7 @@ do;
 							if(%#chest_sand% = 28);look(488,20);wait(%#time%ms);endif;
 							if(%#chest_sand% = 29);look(488,34);wait(%#time%ms);endif;
 							if(%#chest_sand% = 30);look(488,44);wait(%#time%ms);endif;
-							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_sand%");
+							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_sand%");
 							
 								#gui=0;#stop = 0;
 								do;
@@ -960,7 +1047,7 @@ do;
 							if(%#chest_dirt% = 28);look(308,20);wait(%#time%ms);endif;
 							if(%#chest_dirt% = 29);look(308,34);wait(%#time%ms);endif;
 							if(%#chest_dirt% = 30);look(308,44);wait(%#time%ms);endif;
-							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_dirt%");
+							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_dirt%");
 							
 								#gui=0;#stop = 0;
 								do;
@@ -998,7 +1085,7 @@ do;
 							if(%#chest_trash% = 2);look(90,68);wait(%#time%ms);endif;
 							if(%#chest_trash% = 3);look(180,68);wait(%#time%ms);endif;
 							if(%#chest_trash% = 4);look(270,68);wait(%#time%ms);endif;
-							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_dirt%");
+							log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_dirt%");
 							
 								#gui=0;#stop = 0;#slot = 0;
 								do;
@@ -1036,9 +1123,9 @@ do;
 						#chest_sand = 1;
 						#chest_trash = 1;
 					endif;
-					-- Fim dos reposiÃ§Ã£o de recursos
+					-- Fim dos reposição de recursos
 					
-					///////////Pegando recursos no baÃº                
+					///////////Pegando recursos no baú                
 					if(pegar_cacto);
 						unset(pegar_cacto);
 							do;
@@ -1072,7 +1159,7 @@ do;
 								if(%#chest_cactu% = 28);look(398,20);wait(%#time%ms);endif;
 								if(%#chest_cactu% = 29);look(398,34);wait(%#time%ms);endif;
 								if(%#chest_cactu% = 30);look(398,44);wait(%#time%ms);endif;
-								log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_cactu%");
+								log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_cactu%");
 								
 								#slot = 0;#stop = 0;
 								#inventory_full = 0;
@@ -1169,7 +1256,7 @@ do;
 								if(%#chest_sand% = 28);look(488,20);wait(%#time%ms);endif;
 								if(%#chest_sand% = 29);look(488,34);wait(%#time%ms);endif;
 								if(%#chest_sand% = 30);look(488,44);wait(%#time%ms);endif;
-								log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_sand%");
+								log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_sand%");
 								
 								#slot=0;#stop=0;
 								#inventory_full = 0;
@@ -1266,7 +1353,7 @@ do;
 								if(%#chest_dirt% = 28);look(308,20);wait(%#time%ms);endif;
 								if(%#chest_dirt% = 29);look(308,34);wait(%#time%ms);endif;
 								if(%#chest_dirt% = 30);look(308,44);wait(%#time%ms);endif;
-								log("&9&l[&f&oM&facro&9&l] &fOlhando para o baÃº: &l&6%#chest_dirt%");
+								log("&9&l[&f&oM&facro&9&l] &fOlhando para o baú: &l&6%#chest_dirt%");
 								
 								#slot=0;#stop=0;
 								#inventory_full = 0;
@@ -1330,7 +1417,7 @@ do;
 					
 					
 					
-					////////Verificando se foi pego itens suficientes no baÃº
+					////////Verificando se foi pego itens suficientes no baú
 					gui(inventory);
 					wait(1);
 					
@@ -1364,13 +1451,15 @@ do;
 					
 					if(parar);
 						unset(parar);
-						log("&9&l[&f&oM&facro&9&l] &aVocÃª nÃ£o estÃ¡ no limite minÃ­mo para continuar.");
+						log("&9&l[&f&oM&facro&9&l] &aVocê não está no limite minímo para continuar.");
 						log("&9&l[&f&oM&facro&9&l] &aDesligando...");
 						unset(mcacto);
 						log("");
 						log(&9&l[&f&oM&racro&9&l] &cTorre de Cacto &f&l[&4OFF&f&l]);
 						keyup(back);keyup(forward);
 						keyup(sneak);keyup(jump);
+						unset(@cacto_tower_save);
+						stop(cactosave);
 						stop;
 					else;
 						log("&9&l[&f&oM&facro&9&l] &aRetornando...");
@@ -1386,7 +1475,7 @@ do;
 							gui(inventory);
 					endif;
 				endif;
-				--Fim da busca no baÃº
+				--Fim da busca no baú
 				
 				--Arrumar slots
 				if(%#cacto%<2);
@@ -1563,6 +1652,7 @@ do;
 			
 			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			do(4);pick(12);look(+90,60);wait(100ms);key(use);wait(350ms);loop;
+			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
 			#ypos= %YPOS% + 3;
 			do;pick(3);look(90,90);keydown(jump);wait(200ms);key(use);keyup(jump);wait(400ms);until(%YPOS%=%#ypos%);
 			if((KEY_RETURN)&&(KEY_BACK));if(!menu_pause);set(menu_pause);log("");log("&9&l[&f&oM&facro&9&l] &aPausa solicitada.");log("&9&l[&f&oM&facro&9&l] &aAguarde...");endif;endif;
@@ -1641,11 +1731,15 @@ do;
 				endif;
 			next;
 			
+			if(%#floor_now%>%#andares%);
+				inc(#torres_feitas);
+			endif;
+			
 			log("");
 			log("&9&l[&f&oM&facro&9&l] &aTorre Cacto:");
 			log("");
-			log("&9&l[&f&oM&facro&9&l] &fTorres concluÃ­das: &a%#torres_feitas%/%#homes%");
-			log("&9&l[&f&oM&facro&9&l] &fAndar concluÃ­do: &a%#andares_concluidos%/%#andares%"); 
+			log("&9&l[&f&oM&facro&9&l] &fTorres concluídas: &a%#torres_feitas%/%#homes%");
+			log("&9&l[&f&oM&facro&9&l] &fAndar concluído: &a%#andares_concluidos%/%#andares%"); 
 			log("&9&l[&f&oM&facro&9&l] &fAndares feitos (total): &a%#total_andares_concluidos%");   
 			wait(500ms);
 		loop;
@@ -1657,6 +1751,7 @@ do;
     endif;
 until(%#all_done% = 1);
 /////////////////Fim das torres
+
 #fa_torre = 0;
 wait(3);
 clearchat();
@@ -1671,8 +1766,10 @@ log("&9&l[&f&oM&racro&9&l] &cTorre de Cacto &f&l[&4OFF&f&l]");
 unset(&towers_done[]);
 unset(doing_already);
 unset(mcacto);
+unset(@cacto_tower_save);
 set(#tower_now,"1");
 set(#floor_now,"1");
+stop(cactosave);
 stop;
 endif;
 }$$

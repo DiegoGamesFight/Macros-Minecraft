@@ -1,0 +1,13 @@
+&y = $$[1]; //$$[1] guarda o primeiro parâmetro
+
+ifmatches(%&y%,"true");
+	log("&9&l[&f&oM&racro&9&l] &aAuto-saveLife ligado!");
+	set(@cacto_tower_save);
+	do;
+		if(%HEALTH% < 5);
+			set(@cacto_tower_save_msg);
+			disconnect();
+			stop;
+		endif;
+	loop;
+endif;
