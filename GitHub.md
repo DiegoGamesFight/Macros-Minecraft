@@ -23,7 +23,7 @@ branch = "Copy of the master branch to do test/modify/change, etc."
 - `git checkout <branch_name>` (Switch to the specified branch in the repository)
 
 ## Useful commands:
-- `git branch --v` (This will list out your local branches with more information including what each branch is tracking and if your local branch is ahead, behind or both.)
+- `git branch -vv` (This will list out your local branches with more information including what each branch is tracking and if your local branch is ahead, behind or both.)
 
 ```vim
    iss53     7e424c3 [origin/iss53: ahead 2] Add forgotten brackets
