@@ -1,0 +1,213 @@
+$${
+
+
+do;
+    //Primeira DireÁ„o
+    
+    wait(500ms);
+    set(&dir,"");
+    set(#xoff,"");
+    set(#zoff,"");
+
+    ifmatches(%DIRECTION%,"N");set(&dir,"NORTH");set(#zoff,"-1");endif;
+    ifmatches(%DIRECTION%,"S");set(&dir,"SOUTH");set(#zoff,"1");endif;
+    ifmatches(%DIRECTION%,"W");set(&dir,"WEST");set(#xoff,"-1");endif;
+    ifmatches(%DIRECTION%,"E");set(&dir,"EAST");set(#xoff,"1");endif;
+
+        
+        set(#fin,"0");
+            do; 
+                getidrel(%#xoff%,-1,%#zoff%,&idbk);
+                    ifmatches(%&idbk%,"^dirt$|^sand$");
+                        look(%&dir%);
+                        keydown(forward);
+                            ifmatches(%HITID%,"reeds");
+                                key(attack);
+                                wait(50ms);
+                            endif;
+                    else;
+                        wait(500ms);
+                        keyup(forward);
+                        set(#fin,"1");
+                    endif;
+                    
+                getidrel(0,0,0,&air);
+                    ifmatches(%&air%,"air");
+                        pick(reeds);
+                        look(,90);
+                        wait(30ms);
+                        key(use);
+                        look(%dir%);
+                    endif;
+            until(%#fin%=1);
+        
+        //Ir para outro lado
+        
+            wait(750ms);
+            unset(cana1);
+            set(#xoff_1,"");
+            set(#xoff_2,"");
+            set(#zoff_1,"");
+            set(#zoff_2,"");
+                ifmatches(%&dir%,"NORTH");
+                    set(#xoff_1,"-1");
+                    set(#xoff_2,"-2");
+                    set(&dir,"SOUTH");
+                else;
+                    ifmatches(%&dir%,"SOUTH");
+                        set(#xoff_1,"1");
+                        set(#xoff_2,"2");
+                        set(&dir,"NORTH");
+                    else;
+                        ifmatches(%&dir%,"WEST");
+                            set(#zoff_1,"1");
+                            set(#zoff_2,"2");
+                            set(&dir,"EAST");
+                        else;
+                            ifmatches(%&dir%,"EAST");
+                                set(#zoff_1,"-1");
+                                set(#zoff_2,"-2");
+                                set(&dir,"WEST");
+                            endif;
+                        endif;
+                    endif;
+                endif;
+                    
+                getidrel(%#xoff_1%,-1,%#zoff_1%,&idbk);
+                    ifmatches(%&idbk%,"^dirt$|^sand$"); //Verifica se existe terra ou areia ao lado
+                        keydown(sneak);
+                        look(%&dir%);look(,90);
+                        set(#xpos,"%XPOS%");
+                        set(#zpos,"%ZPOS%");
+                            ifmatches(%&dir%,"NORTH");do;keydown(right);until(%XPOS%=%#xpos%+1);wait(150ms);keyup(right);endif;
+                            ifmatches(%&dir%,"SOUTH");do;keydown(right);until(%XPOS%=%#xpos%-1);wait(150ms);keyup(right);endif; 
+                            ifmatches(%&dir%,"WEST");do;keydown(right);until(%ZPOS%=%#zpos%-1);wait(150ms);keyup(right);endif;  
+                            ifmatches(%&dir%,"EAST");do;keydown(right);until(%ZPOS%=%#zpos%+1);wait(150ms);keyup(right);endif;
+                        keyup(sneak);
+                    else; //Se n√£o tiver areia ou terra do lado, verificar pr√≥xima √† 2 blocos
+                        getidrel(%#xoff_2%,-1,%#zoff_2%,&idbk);
+                            ifmatches(%&idbk%,"^dirt$|^sand$");
+                                keydown(sneak);
+                                    look(%&dir%);look(,90);
+                                    set(#xpos,"%XPOS%");
+                                    set(#zpos,"%ZPOS%");
+                                        ifmatches(%&dir%,"NORTH");do;keydown(right);until(%XPOS%=%#xpos%+2);wait(150ms);keyup(right);endif;
+                                        ifmatches(%&dir%,"SOUTH");do;keydown(right);until(%XPOS%=%#xpos%-2);wait(150ms);keyup(right);endif; 
+                                        ifmatches(%&dir%,"WEST");do;keydown(right);until(%ZPOS%=%#zpos%-2);wait(150ms);keyup(right);endif;  
+                                        ifmatches(%&dir%,"EAST");do;keydown(right);until(%ZPOS%=%#zpos%+2);wait(150ms);keyup(right);endif;
+                                keyup(sneak);
+                            else;
+                                set(cana1);
+                                log(acabou);
+                            endif;
+                    endif;
+        
+    //Segunda Dire√ß√£o
+        
+        if(!cana1);
+            wait(500ms);
+            set(&dir,"");
+            set(#xoff,"");
+            set(#zoff,"");
+
+            ifmatches(%DIRECTION%,"N");set(&dir,"NORTH");set(#zoff,"-1");endif;
+            ifmatches(%DIRECTION%,"S");set(&dir,"SOUTH");set(#zoff,"1");endif;
+            ifmatches(%DIRECTION%,"W");set(&dir,"WEST");set(#xoff,"-1");endif;
+            ifmatches(%DIRECTION%,"E");set(&dir,"EAST");set(#xoff,"1");endif;
+            
+            set(#fin,"0");
+                do; 
+                    getidrel(%#xoff%,-1,%#zoff%,&idbk);
+                        ifmatches(%&idbk%,"^dirt$|^sand$");
+                            look(%&dir%);
+                            keydown(forward);
+                                ifmatches(%HITID%,"reeds");
+                                    key(attack);
+                                    wait(50ms);
+                                endif;
+                        else;
+                            wait(500ms);
+                            keyup(forward);
+                            set(#fin,"1");
+                        endif;
+                        
+                    getidrel(0,0,0,&air);
+                        ifmatches(%&air%,"air");
+                            pick(reeds);
+                            look(,90);
+                            wait(30ms);
+                            key(use);
+                            look(%dir%);
+                        endif;
+                until(%#fin%=1);
+        
+        //Ir para outro lado
+        
+            wait(750ms);
+            unset(cana2);
+            set(#xoff_1,"");
+            set(#xoff_2,"");
+            set(#zoff_1,"");
+            set(#zoff_2,"");
+                ifmatches(%&dir%,"NORTH");
+                    set(#xoff_1,"1");
+                    set(#xoff_2,"2");
+                    set(&dir,"SOUTH");
+                else;
+                    ifmatches(%&dir%,"SOUTH");
+                        set(#xoff_1,"-1");
+                        set(#xoff_2,"-2");
+                        set(&dir,"NORTH");
+                    else;
+                        ifmatches(%&dir%,"WEST");
+                            set(#zoff_1,"-1");
+                            set(#zoff_2,"-2");
+                            set(&dir,"EAST");
+                        else;
+                            ifmatches(%&dir%,"EAST");
+                                set(#zoff_1,"1");
+                                set(#zoff_2,"2");
+                                set(&dir,"WEST");
+                            endif;
+                        endif;
+                    endif;
+                endif;
+                    
+                getidrel(%#xoff_1%,-1,%#zoff_1%,&idbk);
+                    ifmatches(%&idbk%,"^dirt$|^sand$"); //Verifica se existe terra ou areia ao lado
+                        keydown(sneak);
+                        look(%&dir%);look(,90);
+                        set(#xpos,"%XPOS%");
+                        set(#zpos,"%ZPOS%");
+                            ifmatches(%&dir%,"NORTH");do;keydown(left);until(%XPOS%=%#xpos%-1);wait(150ms);keyup(left);endif;
+                            ifmatches(%&dir%,"SOUTH");do;keydown(left);until(%XPOS%=%#xpos%+1);wait(150ms);keyup(left);endif;   
+                            ifmatches(%&dir%,"WEST");do;keydown(left);until(%ZPOS%=%#zpos%+1);wait(150ms);keyup(left);endif;    
+                            ifmatches(%&dir%,"EAST");do;keydown(left);until(%ZPOS%=%#zpos%-1);wait(150ms);keyup(left);endif;
+                        keyup(sneak);
+                    else; //Se n√£o tiver areia ou terra do lado, verificar prÛxima ‡ 2 blocos
+                        getidrel(%#xoff_2%,-1,%#zoff_2%,&idbk);
+                            ifmatches(%&idbk%,"^dirt$|^sand$");
+                                keydown(sneak);
+                                    look(%&dir%);look(,90);
+                                    set(#xpos,"%XPOS%");
+                                    set(#zpos,"%ZPOS%");
+                                        ifmatches(%&dir%,"NORTH");do;keydown(left);until(%XPOS%=%#xpos%-2);wait(150ms);keyup(left);endif;
+                                        ifmatches(%&dir%,"SOUTH");do;keydown(left);until(%XPOS%=%#xpos%+2);wait(150ms);keyup(left);endif;   
+                                        ifmatches(%&dir%,"WEST");do;keydown(left);until(%ZPOS%=%#zpos%+2);wait(150ms);keyup(left);endif;    
+                                        ifmatches(%&dir%,"EAST");do;keydown(left);until(%ZPOS%=%#zpos%-2);wait(150ms);keyup(left);endif;
+                                keyup(sneak);
+                            else;
+                                set(cana2);
+                                log(acabou);
+                            endif;
+                    endif;
+        endif;
+        
+while((!cana1)&&(!cana2));
+        
+        
+
+
+
+}$$
+
